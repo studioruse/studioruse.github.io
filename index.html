@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Studio Ruse — Illustration Studio, Coming Soon</title>
-<meta name="description" content="Studio Ruse. An illustration studio. Something is taking shape.">
+<meta name="description" content="Studio Ruse. An illustration studio based in India, creating for the world.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --black: #0a0606;
-    --ink: #170f10;
-    --red: #b31d2e;
-    --red-dim: #5c1118;
-    --paper: #ece2dd;
-    --muted: #8a6b68;
+    --black: #0c0807;
+    --plate: #150e0d;
+    --red: #9c1c1f;
+    --red-deep: #4a0e10;
+    --paper: #e9ded4;
+    --muted: #8a6c66;
   }
 
   *{ box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,116 +33,138 @@
     position: relative;
   }
 
-  /* subtle grain texture for depth */
+  /* hidden SVG holding the roughen (hand-cut edge) filter, referenced by CSS below */
+  .defs{ position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  /* paper grain, sits over everything at low opacity */
   .grain{
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.05;
+    opacity: 0.07;
     mix-blend-mode: overlay;
+    z-index: 4;
+  }
+
+  /* printer's plate frame with registration-style corner marks */
+  .plate{
+    position: fixed;
+    inset: 26px;
+    border: 1px solid var(--red-deep);
+    pointer-events: none;
     z-index: 2;
   }
 
-  /* soft red vignette glow from the center */
-  .glow{
+  .reg{
     position: fixed;
-    inset: 0;
-    background: radial-gradient(ellipse 60% 45% at 50% 40%, rgba(179,29,46,0.16), transparent 70%);
+    width: 14px;
+    height: 14px;
     pointer-events: none;
-    z-index: 1;
+    z-index: 3;
+    opacity: 0.55;
   }
+  .reg::before, .reg::after{
+    content: '';
+    position: absolute;
+    background: var(--muted);
+  }
+  .reg::before{ width: 100%; height: 1px; top: 50%; left: 0; }
+  .reg::after{ height: 100%; width: 1px; left: 50%; top: 0; }
+  .reg.tl{ top: 42px; left: 42px; }
+  .reg.tr{ top: 42px; right: 42px; }
+  .reg.bl{ bottom: 42px; left: 42px; }
+  .reg.br{ bottom: 42px; right: 42px; }
 
   main{
     position: relative;
-    z-index: 3;
+    z-index: 5;
     text-align: center;
     padding: 32px;
-    max-width: 640px;
+    max-width: 680px;
   }
 
-  /* the hand-drawn hero flourish */
-  .flourish{
-    width: min(70vw, 300px);
-    height: auto;
-    margin: 0 auto 8px;
-    display: block;
-    overflow: visible;
-  }
-
-  .flourish path{
-    fill: none;
-    stroke: var(--red);
-    stroke-width: 2.4;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    pathLength: 1;
-    animation: draw-line 1.8s cubic-bezier(0.65,0,0.35,1) 0.2s forwards;
-  }
-
-  h1{
-    font-family: 'Bodoni Moda', serif;
-    font-weight: 500;
-    font-size: clamp(4rem, 15vw, 8rem);
-    letter-spacing: 0.02em;
-    line-height: 0.9;
-    color: var(--paper);
+  .wordmark{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(10px, 2.4vw, 22px);
+    transform: rotate(-1.5deg) scale(1.12);
     opacity: 0;
-    margin-top: 6px;
-    animation: rise 1s ease-out 1.6s forwards;
+    animation: stamp 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.15) 0.15s forwards;
+  }
+
+  .wordmark span{
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2.6rem, 9vw, 5.2rem);
+    letter-spacing: 0.01em;
+    line-height: 1;
+    color: var(--paper);
+    filter: url(#roughen);
+    white-space: nowrap;
+  }
+
+  .mark{
+    width: clamp(46px, 8vw, 78px);
+    height: auto;
+    filter: url(#roughen);
+    flex-shrink: 0;
   }
 
   .kicker{
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    color: var(--muted);
-    font-weight: 400;
-    margin-top: 14px;
+    margin-top: 22px;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    color: var(--red);
     opacity: 0;
-    animation: rise 0.9s ease-out 2s forwards;
+    animation: rise 0.8s ease-out 0.85s forwards;
   }
 
   .tagline{
-    font-family: 'Bodoni Moda', serif;
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(1.05rem, 2.6vw, 1.35rem);
+    font-size: clamp(1rem, 2.3vw, 1.2rem);
     color: var(--paper);
-    line-height: 1.55;
-    max-width: 440px;
-    margin: 20px auto 0;
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 18px auto 0;
     opacity: 0;
-    animation: rise 0.9s ease-out 2.3s forwards;
+    animation: rise 0.8s ease-out 1.05s forwards;
+  }
+
+  .rule{
+    width: 0;
+    height: 1px;
+    background: var(--red);
+    margin: 30px auto 0;
+    animation: draw 0.8s cubic-bezier(0.65,0,0.35,1) 1.3s forwards;
   }
 
   .status{
-    margin-top: 34px;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    color: var(--red);
+    margin-top: 22px;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
     opacity: 0;
-    animation: rise 0.9s ease-out 2.6s forwards;
+    animation: rise 0.8s ease-out 1.5s forwards;
   }
 
   footer{
     position: fixed;
-    bottom: 28px;
+    bottom: 44px;
     left: 0;
     right: 0;
     text-align: center;
-    z-index: 3;
+    z-index: 5;
     font-size: 0.7rem;
     color: var(--muted);
     letter-spacing: 0.04em;
     opacity: 0;
-    animation: rise 0.9s ease-out 2.85s forwards;
+    animation: rise 0.8s ease-out 1.7s forwards;
   }
 
   footer a{
     color: var(--muted);
     text-decoration: none;
-    border-bottom: 1px solid var(--red-dim);
+    border-bottom: 1px solid var(--red-deep);
     padding-bottom: 1px;
     transition: color 0.25s ease, border-color 0.25s ease;
   }
@@ -154,42 +176,88 @@
 
   a:focus-visible{ outline: 1px solid var(--red); outline-offset: 4px; }
 
+  @keyframes stamp{
+    from{ opacity: 0; transform: rotate(-1.5deg) scale(1.12); }
+    to{ opacity: 1; transform: rotate(-1.2deg) scale(1); }
+  }
+
   @keyframes rise{
-    from{ opacity: 0; transform: translateY(10px); }
+    from{ opacity: 0; transform: translateY(8px); }
     to{ opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes draw-line{
-    to{ stroke-dashoffset: 0; }
+  @keyframes draw{ to{ width: 72px; } }
+
+  @media (max-width: 480px){
+    .plate{ inset: 14px; }
+    .reg.tl, .reg.tr{ top: 22px; }
+    .reg.bl, .reg.br{ bottom: 22px; }
+    .reg.tl, .reg.bl{ left: 22px; }
+    .reg.tr, .reg.br{ right: 22px; }
   }
 
   @media (prefers-reduced-motion: reduce){
-    .flourish path, h1, .kicker, .tagline, .status, footer{
+    .wordmark, .kicker, .tagline, .rule, .status, footer{
       animation: none !important;
       opacity: 1 !important;
     }
-    .flourish path{ stroke-dashoffset: 0; }
+    .wordmark{ transform: none; }
+    .rule{ width: 72px; }
   }
 </style>
 </head>
 <body>
 
+  <svg class="defs" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="roughen" x="-30%" y="-30%" width="160%" height="160%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="2" seed="7" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
   <svg class="grain" width="100%" height="100%">
     <filter id="noise">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"></feTurbulence>
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence>
     </filter>
     <rect width="100%" height="100%" filter="url(#noise)"></rect>
   </svg>
-  <div class="glow"></div>
+
+  <div class="plate"></div>
+  <div class="reg tl"></div>
+  <div class="reg tr"></div>
+  <div class="reg bl"></div>
+  <div class="reg br"></div>
 
   <main>
-    <svg class="flourish" viewBox="0 0 320 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path pathLength="1" d="M18,95 C34,42 82,18 124,48 C154,70 128,104 96,92 C66,80 78,40 118,32 C168,22 232,40 258,82 C272,104 254,122 224,116 C200,111 206,88 226,80 C246,72 268,80 278,98" />
-    </svg>
+    <div class="wordmark">
+      <span>Studio</span>
 
-    <h1>Ruse</h1>
+      <svg class="mark" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" aria-label="Studio Ruse rose emblem">
+        <g stroke="#0c0807" stroke-width="2" stroke-linejoin="round">
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#9c1c1f" transform="rotate(0 160 160)"/>
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#4a0e10" transform="rotate(45 160 160)"/>
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#9c1c1f" transform="rotate(90 160 160)"/>
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#4a0e10" transform="rotate(135 160 160)"/>
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#9c1c1f" transform="rotate(180 160 160)"/>
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#4a0e10" transform="rotate(225 160 160)"/>
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#9c1c1f" transform="rotate(270 160 160)"/>
+          <polygon points="160,160 140,95 160,55 188,80 172,120" fill="#4a0e10" transform="rotate(315 160 160)"/>
+        </g>
+        <polygon points="160,160 148,128 160,110 176,130" fill="#e9ded4" stroke="#0c0807" stroke-width="2" stroke-linejoin="round"/>
+        <g stroke="#0c0807" stroke-width="1.5" opacity="0.55">
+          <line x1="150" y1="100" x2="160" y2="130"/>
+          <line x1="170" y1="95" x2="163" y2="128"/>
+        </g>
+      </svg>
+
+      <span>Ruse</span>
+    </div>
+
     <p class="kicker">an illustration studio</p>
-    <p class="tagline">Every ruse starts as a single line — ink first, meaning later. We're still drawing this one out.</p>
+    <p class="tagline">Based in India, creating for the world.</p>
+    <div class="rule"></div>
     <p class="status">arriving soon</p>
   </main>
 
